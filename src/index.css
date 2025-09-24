@@ -26,8 +26,8 @@
   /* Interactive Elements */
   --button-bg: 0 0% 6%;
   /* Button background #0f0f0f */
-  --button-bg-hover: 0 0% 8%;
-  /* Button hover #141414 */
+  --button-bg-hover: 0 0% 15%;
+  /* Button hover #242424 */
   --button-border: 0 0% 13%;
   /* Button border #222 */
 
@@ -175,7 +175,7 @@ body {
 }
 
 .demo-button {
-  @apply px-3 py-1.5 rounded border text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+  @apply px-3 py-1.5 rounded border text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 inline-flex items-center justify-center leading-none;
   background: hsl(var(--button-bg));
   border-color: hsl(var(--button-border));
   color: hsl(var(--foreground));
@@ -184,6 +184,7 @@ body {
   transition: var(--transition-micro);
   min-width: 2.25rem;
   min-height: 2.25rem;
+  cursor: pointer;
 }
 
 .demo-button:hover {
@@ -196,6 +197,25 @@ body {
 
 .demo-button-tooltip {
   @apply text-[14px];
+}
+
+/* HUD button interactions (shadcn Button) */
+.demo-hud [data-slot="button"],
+.demo-hud button,
+.demo-hud a {
+  cursor: pointer;
+}
+
+.demo-hud [data-slot="button"] svg,
+.demo-hud button svg,
+.demo-hud a svg {
+  transition: var(--transition-micro);
+}
+
+.demo-hud [data-slot="button"]:hover svg,
+.demo-hud button:hover svg,
+.demo-hud a:hover svg {
+  color: hsl(var(--muted));
 }
 
 .demo-fps {
@@ -229,7 +249,7 @@ body {
 
 /* Focus and interaction states */
 .demo-card-link {
-  @apply block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+  @apply block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2;
   border-radius: var(--radius);
 }
 
