@@ -2,6 +2,7 @@ import { Pause, Play, RotateCcw, HelpCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { FpsCounter } from '@/components/FpsCounter';
 
 interface HudProps {
   title: string;
@@ -11,6 +12,7 @@ interface HudProps {
   onReset: () => void;
   onToggleHelp: () => void;
   showHelp: boolean;
+  showDebug: boolean;
 }
 
 export function Hud({
@@ -21,6 +23,7 @@ export function Hud({
   onReset,
   onToggleHelp,
   showHelp,
+  showDebug,
 }: HudProps) {
   const withTooltip = (
     control: React.ReactNode,
@@ -35,6 +38,7 @@ export function Hud({
   );
 
   return (
+    <>
     <div className="demo-hud">
       {withTooltip(
         <Button asChild variant="outline" size="icon" aria-label="Back to home">
@@ -84,13 +88,22 @@ export function Hud({
         'Help'
       )}
 
-      <span className="demo-fps">
-        {fps.toFixed(0)} FPS
-      </span>
+      {/* Top-right debug overlay is rendered outside the left cluster */}
     </div>
+    <DebugOverlay fps={fps} show={showDebug} />
+    </>
   );
 }
 
 export default Hud;
+
+export function DebugOverlay({ fps, show }: { fps: number; show: boolean }) {
+  if (!show) return null;
+  return (
+    <div className="debug-overlay" aria-label="Debug overlay">
+      <FpsCounter fps={fps} />
+    </div>
+  );
+}
 
 

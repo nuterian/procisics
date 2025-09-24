@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { Keyboard } from 'lucide-react';
 import Hud from '@/components/Hud';
 
 export interface FrameContext {
@@ -31,6 +32,7 @@ export const DemoPage = ({
   const [showHelp, setShowHelp] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [fps, setFps] = useState(0);
+  const [showDebug, setShowDebug] = useState(true);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -161,6 +163,9 @@ export const DemoPage = ({
       if (key === 'h') {
         setShowHelp((s) => !s);
       }
+      if (key === 'f') {
+        setShowDebug((s) => !s);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -198,18 +203,14 @@ export const DemoPage = ({
         onReset={handleReset}
         onToggleHelp={toggleHelp}
         showHelp={showHelp}
+        showDebug={showDebug}
       />
 
       {/* Help Panel */}
       {showHelp && (
-        <div className="help-panel">
-          <h3 className="help-title">Controls</h3>
-          <div className="help-list">
-            <div className="help-item">• Space: Pause/Resume</div>
-            <div className="help-item">• R: Reset</div>
-            <div className="help-item">• H: Toggle help</div>
-            <div className="help-item">• Escape: Close help</div>
-          </div>
+        <div className="help-panel" role="dialog" aria-label="Hotkeys help">
+          <h3 className="help-title"><Keyboard className="help-title-icon" /> Hotkeys</h3>
+          <HelpList />
         </div>
       )}
 
@@ -219,3 +220,51 @@ export const DemoPage = ({
 };
 
 export default DemoPage;
+
+function Keycap({ label }: { label: string }) {
+  const isSpace = label.toLowerCase() === 'space';
+  const display = label === ' ' ? 'Space' : label;
+  const className = isSpace ? 'keycap keycap-space' : 'keycap';
+  return <span className={className}>{display}</span>;
+}
+
+function HelpList() {
+  const hotkeys: Array<{ keys: string | string[]; text: string }> = [
+    { keys: 'Space', text: 'Pause / Play' },
+    { keys: 'R', text: 'Reset' },
+    { keys: 'H', text: 'Toggle help' },
+    { keys: 'F', text: 'Toggle debug' },
+    { keys: 'Esc', text: 'Close help' },
+  ];
+
+  const renderKeys = (keys: string | string[]) => {
+    if (Array.isArray(keys)) {
+      return (
+        <div className="help-keys">
+          {keys.map((k, i) => (
+            <>
+              <Keycap key={k + i} label={k} />
+              {i < keys.length - 1 ? <span className="help-plus">+</span> : null}
+            </>
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="help-keys">
+        <Keycap label={keys} />
+      </div>
+    );
+  };
+
+  return (
+    <div className="help-grid">
+      {hotkeys.map((hk, idx) => (
+        <div className="help-row" key={idx}>
+          {renderKeys(hk.keys)}
+          <div className="help-text help-text-right">{hk.text}</div>
+        </div>
+      ))}
+    </div>
+  );
+}

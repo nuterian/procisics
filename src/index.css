@@ -224,27 +224,100 @@ body {
   font-size: var(--text-xs);
 }
 
+/* Debug overlay (top-right container) */
+.debug-overlay {
+  @apply fixed top-4 right-4 z-20 rounded-lg border p-2 flex flex-col gap-2;
+  background: hsl(var(--card));
+  border-color: hsl(var(--card-border));
+  border-radius: var(--radius);
+}
+
+.debug-item {
+  @apply flex items-center gap-2;
+  min-height: 2.25rem; /* match HUD icon button min-height */
+}
+
+.debug-icon {
+  width: 16px;
+  height: 16px;
+  color: hsl(var(--muted));
+}
+
+.debug-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem; /* match --text-xs scale visually but crisper */
+  color: hsl(var(--foreground));
+}
+
+.debug-sparkline {
+  display: block;
+}
+
 .help-panel {
-  @apply fixed top-16 left-4 p-4 rounded-lg border max-w-xs z-20;
+  @apply fixed top-20 left-4 p-4 rounded-lg border max-w-xs z-20;
   background: hsl(var(--card));
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
 }
 
 .help-title {
-  @apply font-semibold mb-3;
-  font-size: var(--text-lg);
+  @apply mb-3 flex items-center gap-2;
+  font-size: var(--text-base);
+  color: hsl(var(--muted));
+  letter-spacing: 0.02em;
+}
+
+.help-title-icon {
+  width: 18px;
+  height: 18px;
+  color: hsl(var(--muted));
+}
+
+/* Redesigned help list */
+.help-grid {
+  @apply space-y-2;
+}
+
+.help-row {
+  @apply grid items-center;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
+}
+
+.help-keys {
+  @apply flex items-center gap-1;
+}
+
+.help-text {
+  color: hsl(var(--card-foreground));
+  font-size: var(--text-base);
+}
+
+.help-text-right {
+  @apply text-right;
+}
+
+/* Removed icon column */
+
+/* Keycaps */
+.keycap {
+  @apply inline-flex items-center justify-center select-none;
+  min-width: 1.5rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid hsl(var(--card-border));
+  border-bottom-color: hsl(var(--card-border-hover));
+  background: linear-gradient(180deg, hsl(var(--button-bg)) 0%, hsl(var(--secondary)) 100%);
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 hsl(var(--card-border));
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
   color: hsl(var(--card-foreground));
 }
 
-.help-list {
-  @apply space-y-1;
-}
-
-.help-item {
-  @apply text-sm;
-  font-size: var(--text-base);
-  color: hsl(var(--muted));
+.keycap-space {
+  min-width: 3.5rem;
 }
 
 /* Focus and interaction states */

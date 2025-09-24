@@ -13,7 +13,7 @@ const Home = () => {
         <div className="portfolio-container">
             <div className="portfolio-intro">
                 <h1 className="portfolio-title">Procisics</h1>
-                <p className="portfolio-subtitle">Interactive physics simulations</p>
+                <p className="portfolio-subtitle">Interactive procedural physics experiments</p>
             </div>
 
             <div className="demos-grid">
