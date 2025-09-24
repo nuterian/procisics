@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 src/components/ui/
-.TASKS.md
+TASKS.md
 *.pdf
 
 # Editor directories and files
