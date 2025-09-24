@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { Pause, Play, RotateCcw, HelpCircle, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 export interface FrameContext {
   canvas: HTMLCanvasElement;
@@ -191,32 +194,56 @@ export const DemoPage = ({
       
       {/* HUD Controls */}
       <div className="demo-hud">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to="/" className="demo-button" aria-label="Back to home">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Home</TooltipContent>
+        </Tooltip>
+        <span className="mx-1 text-neutral-500">/</span>
         <span className="demo-title">{title}</span>
         
-        <button 
-          className="demo-button" 
-          onClick={handlePause}
-          aria-label={isPaused ? 'Resume simulation' : 'Pause simulation'}
-        >
-          {isPaused ? 'Resume' : 'Pause'}
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className="demo-button" 
+              onClick={handlePause}
+              aria-label={isPaused ? 'Resume simulation' : 'Pause simulation'}
+            >
+              {isPaused ? <Play className="size-4" /> : <Pause className="size-4" />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{isPaused ? 'Resume' : 'Pause'}</TooltipContent>
+        </Tooltip>
         
-        <button 
-          className="demo-button" 
-          onClick={handleReset}
-          aria-label="Reset simulation"
-        >
-          Reset
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className="demo-button" 
+              onClick={handleReset}
+              aria-label="Reset simulation"
+            >
+              <RotateCcw className="size-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Reset</TooltipContent>
+        </Tooltip>
         
-        <button 
-          className="demo-button" 
-          onClick={toggleHelp}
-          aria-label="Toggle help panel"
-          aria-expanded={showHelp}
-        >
-          Help
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className="demo-button" 
+              onClick={toggleHelp}
+              aria-label="Toggle help panel"
+              aria-expanded={showHelp}
+            >
+              <HelpCircle className="size-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Help</TooltipContent>
+        </Tooltip>
         
         <span className="demo-fps">
           {fps.toFixed(0)} FPS

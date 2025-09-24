@@ -12,7 +12,6 @@ pnpm install
 2) Start the dev server
 ```bash
 pnpm dev
-# http://localhost:8080
 ```
 
 3) Build and preview
@@ -20,7 +19,4 @@ pnpm dev
 pnpm build
 pnpm preview
 ```
-
-### License
-MIT
 
