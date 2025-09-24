@@ -18,7 +18,6 @@ export const BouncingShapesDemo = () => {
   const PPM = 50; // pixels per meter
   const timeStep = 1 / 60;
 
-  // No local random entity generator; use helper from lib/physics
 
   const onInit = (ctx: FrameContext) => {
     const { ctx: g, width, height } = ctx;
@@ -33,7 +32,7 @@ export const BouncingShapesDemo = () => {
     createBounds(world, width, height, PPM);
 
     // Initial entities
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 25; i++) {
       entitiesRef.current.push(createRandomEntityHelper(world, PPM, width, height));
     }
 
@@ -72,7 +71,7 @@ export const BouncingShapesDemo = () => {
       onPointerDown={(_, p) => {
         if (!worldRef.current) return;
         const world = worldRef.current;
-        const radiusPx = Math.random() * 20 + 10;
+        const radiusPx = Math.random() * 20 + 15;
         const sizePx = radiusPx * 1.4;
         const vel = { vxPx: (Math.random() - 0.5) * 200, vyPx: 300 + Math.random() * 200 };
         if (Math.random() > 0.5) {
