@@ -9,8 +9,6 @@ const Home = () => {
         setDemos(demoRegistry);
     }, []);
 
-    const base = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
-
     return (
         <div className="portfolio-container">
             <div className="portfolio-intro">
