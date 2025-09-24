@@ -200,7 +200,7 @@ export const DemoPage = ({
               <ArrowLeft className="size-4" />
             </Link>
           </TooltipTrigger>
-          <TooltipContent>Home</TooltipContent>
+          <TooltipContent side="bottom" className="demo-button-tooltip">Home</TooltipContent>
         </Tooltip>
         <span className="mx-1 text-neutral-500">/</span>
         <span className="demo-title">{title}</span>
@@ -215,7 +215,7 @@ export const DemoPage = ({
               {isPaused ? <Play className="size-4" /> : <Pause className="size-4" />}
             </button>
           </TooltipTrigger>
-          <TooltipContent>{isPaused ? 'Resume' : 'Pause'}</TooltipContent>
+          <TooltipContent side="bottom" className="demo-button-tooltip">{isPaused ? 'Resume' : 'Pause'}</TooltipContent>
         </Tooltip>
         
         <Tooltip>
@@ -228,7 +228,7 @@ export const DemoPage = ({
               <RotateCcw className="size-4" />
             </button>
           </TooltipTrigger>
-          <TooltipContent>Reset</TooltipContent>
+          <TooltipContent side="bottom" className="demo-button-tooltip">Reset</TooltipContent>
         </Tooltip>
         
         <Tooltip>
@@ -242,7 +242,7 @@ export const DemoPage = ({
               <HelpCircle className="size-4" />
             </button>
           </TooltipTrigger>
-          <TooltipContent>Help</TooltipContent>
+          <TooltipContent side="bottom" className="demo-button-tooltip">Help</TooltipContent>
         </Tooltip>
         
         <span className="demo-fps">

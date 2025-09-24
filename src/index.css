@@ -75,11 +75,11 @@ body {
 }
 
 .portfolio-title {
-  @apply text-4xl font-black mb-3 tracking-tight;
+  @apply text-4xl font-bold mb-3 tracking-tight;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 2.5rem;
   letter-spacing: -0.025em;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .portfolio-subtitle {
@@ -119,10 +119,6 @@ body {
   @apply font-semibold mb-2 decoration-1 underline-offset-4;
   font-size: var(--text-lg);
   color: hsl(var(--card-foreground));
-}
-
-.demo-card-link:hover .demo-card-title {
-  @apply underline;
 }
 
 .demo-card-description {
@@ -173,6 +169,10 @@ body {
 
 .demo-button:focus-visible {
   outline-color: hsl(var(--foreground));
+}
+
+.demo-button-tooltip {
+  @apply text-[14px];
 }
 
 .demo-fps {
