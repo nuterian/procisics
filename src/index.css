@@ -3,23 +3,33 @@
 /* Core tokens (CSS variables) */
 :root {
   /* Core B/W Palette */
-  --background: 0 0% 0%;           /* Pure black #000 */
-  --foreground: 0 0% 100%;         /* Pure white #fff */
+  --background: 0 0% 0%;
+  /* Pure black #000 */
+  --foreground: 0 0% 100%;
+  /* Pure white #fff */
 
   /* Panel System */
-  --card: 0 0% 4%;                 /* Panel background #0a0a0a */
-  --card-foreground: 0 0% 100%;    /* Panel text */
-  --card-border: 0 0% 13%;         /* Panel borders #222 */
-  --card-border-hover: 0 0% 27%;   /* Hover borders #444 */
+  --card: 0 0% 4%;
+  /* Panel background #0a0a0a */
+  --card-foreground: 0 0% 100%;
+  /* Panel text */
+  --card-border: 0 0% 13%;
+  /* Panel borders #222 */
+  --card-border-hover: 0 0% 27%;
+  /* Hover borders #444 */
 
   /* Secondary/Muted */
-  --muted: 0 0% 67%;               /* Muted gray #aaa */
+  --muted: 0 0% 67%;
+  /* Muted gray #aaa */
   --muted-foreground: 0 0% 67%;
 
   /* Interactive Elements */
-  --button-bg: 0 0% 6%;            /* Button background #0f0f0f */
-  --button-bg-hover: 0 0% 8%;      /* Button hover #141414 */
-  --button-border: 0 0% 13%;       /* Button border #222 */
+  --button-bg: 0 0% 6%;
+  /* Button background #0f0f0f */
+  --button-bg-hover: 0 0% 8%;
+  /* Button hover #141414 */
+  --button-border: 0 0% 13%;
+  /* Button border #222 */
 
   /* System Tokens */
   --primary: 0 0% 100%;
@@ -30,17 +40,26 @@
   --accent-foreground: 0 0% 100%;
 
   /* Layout */
-  --radius: 0.75rem;               /* 12px radius */
-  --radius-sm: 0.5rem;             /* 8px for buttons */
-  --spacing-grid: 1.25rem;         /* 20px grid gap */
-  --spacing-panel: 1.125rem;       /* 18px panel padding */
+  --radius: 0.75rem;
+  /* 12px radius */
+  --radius-sm: 0.5rem;
+  /* 8px for buttons */
+  --spacing-grid: 1.25rem;
+  /* 20px grid gap */
+  --spacing-panel: 1.125rem;
+  /* 18px panel padding */
 
   /* Typography Scale */
-  --text-xs: 0.875rem;             /* 14px */
-  --text-base: 1rem;               /* 16px */
-  --text-lg: 1.125rem;             /* 18px */
-  --text-xl: 1.5rem;               /* 24px */
-  --text-2xl: 1.75rem;             /* 28px */
+  --text-xs: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.5rem;
+  /* 24px */
+  --text-2xl: 1.75rem;
+  /* 28px */
 
   /* Transitions */
   --transition-micro: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -51,7 +70,11 @@
   border-color: hsl(var(--card-border));
 }
 
-html, body, #root { height: 100%; }
+html,
+body,
+#root {
+  height: 100%;
+}
 
 body {
   background: hsl(var(--background));
@@ -194,7 +217,9 @@ body {
   color: hsl(var(--card-foreground));
 }
 
-.help-list { @apply space-y-1; }
+.help-list {
+  @apply space-y-1;
+}
 
 .help-item {
   @apply text-sm;
@@ -212,13 +237,60 @@ body {
   outline-color: hsl(var(--foreground));
 }
 
+@keyframes bob {
+
+  0%,
+  100% {
+    transform: translateY(0)
+  }
+
+  50% {
+    transform: translateY(-12px)
+  }
+}
+
+@keyframes tilt {
+
+  0%,
+  100% {
+    transform: rotate(0deg)
+  }
+
+  50% {
+    transform: rotate(18deg)
+  }
+}
+
+.anim-bob-slow {
+  animation: bob 2.2s ease-in-out infinite;
+}
+
+.anim-bob-fast {
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+.anim-tilt {
+  animation: tilt 2s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+  /* ensures SVG rotates around its own box center */
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .portfolio-container { @apply p-4; }
+  .portfolio-container {
+    @apply p-4;
+  }
 
-  .demos-grid { grid-template-columns: 1fr; }
+  .demos-grid {
+    grid-template-columns: 1fr;
+  }
 
-  .demo-hud { @apply left-2 right-2 top-2 flex-wrap; }
+  .demo-hud {
+    @apply left-2 right-2 top-2 flex-wrap;
+  }
 
-  .help-panel { @apply left-2 right-2 top-20; }
+  .help-panel {
+    @apply left-2 right-2 top-20;
+  }
 }
