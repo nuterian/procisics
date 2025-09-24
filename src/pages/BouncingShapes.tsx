@@ -5,6 +5,7 @@ import {
   createBounds,
   createCircleEntity,
   createBoxEntity,
+  createTriangleEntity,
   stepWithFixedTimestep,
   drawEntity,
   createRandomEntity as createRandomEntityHelper,
@@ -32,7 +33,7 @@ export const BouncingShapesDemo = () => {
     createBounds(world, width, height, PPM);
 
     // Initial entities
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 100; i++) {
       entitiesRef.current.push(createRandomEntityHelper(world, PPM, width, height));
     }
 
@@ -55,8 +56,6 @@ export const BouncingShapesDemo = () => {
     g.fillRect(0, 0, width, height);
 
     // Draw entities
-    g.fillStyle = '#ffffff';
-    g.strokeStyle = '#ffffff';
     g.lineWidth = 2;
     for (const ent of entitiesRef.current) {
       drawEntity(g, ent, PPM);
@@ -74,12 +73,13 @@ export const BouncingShapesDemo = () => {
         const radiusPx = Math.random() * 20 + 15;
         const sizePx = radiusPx * 1.4;
         const vel = { vxPx: (Math.random() - 0.5) * 200, vyPx: 300 + Math.random() * 200 };
-        if (Math.random() > 0.5) {
-          const e = createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel);
-          entitiesRef.current.push(e);
+        const r = Math.random();
+        if (r < 1 / 3) {
+          entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
+        } else if (r < 2 / 3) {
+          entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
         } else {
-          const e = createBoxEntity(world, PPM, p.x, p.y, sizePx, vel);
-          entitiesRef.current.push(e);
+          entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
         }
       }}
     />
