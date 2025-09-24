@@ -1,93 +1,123 @@
 import { useMemo, useRef } from 'react';
 import DemoPage, { type FrameContext } from './DemoPage';
+import planck from 'planck-js';
 
-interface Shape {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  type: 'circle' | 'square';
+type ShapeType = 'circle' | 'square';
+
+interface Entity {
+  body: planck.Body;
+  type: ShapeType;
+  radiusPx?: number;
+  sizePx?: number;
 }
 
 export const BouncingShapesDemo = () => {
-  const shapesRef = useRef<Shape[]>([]);
+  const worldRef = useRef<planck.World | null>(null);
+  const entitiesRef = useRef<Entity[]>([]);
+  const accumulatorRef = useRef<number>(0);
 
-  const createRandomShape = useMemo(() => {
-    return (): Shape => ({
-      x: Math.random() * 800 + 100,
-      y: Math.random() * 400 + 100,
-      vx: (Math.random() - 0.5) * 400,
-      vy: (Math.random() - 0.5) * 400,
-      radius: Math.random() * 20 + 10,
-      type: Math.random() > 0.5 ? 'circle' : 'square'
-    });
+  const PPM = 50; // pixels per meter
+  const timeStep = 1 / 60;
+
+  const createRandomEntity = useMemo(() => {
+    return (width: number, height: number, world: planck.World): Entity => {
+      const type: ShapeType = Math.random() > 0.5 ? 'circle' : 'square';
+      const radiusPx = Math.random() * 20 + 10;
+      const sizePx = radiusPx * 1.4;
+      const xPx = Math.random() * Math.max(0, width - 2 * radiusPx) + radiusPx;
+      const yPx = Math.random() * Math.max(0, height - 2 * radiusPx) + radiusPx;
+      const vxPx = (Math.random() - 0.5) * 400;
+      const vyPx = (Math.random() - 0.5) * 400;
+
+      const body = world.createBody({
+        type: 'dynamic',
+        position: planck.Vec2(xPx / PPM, yPx / PPM),
+        linearVelocity: planck.Vec2(vxPx / PPM, vyPx / PPM),
+      });
+
+      if (type === 'circle') {
+        body.createFixture(planck.Circle(radiusPx / PPM), {
+          density: 1,
+          friction: 0.2,
+          restitution: 0.7,
+        });
+        return { body, type, radiusPx };
+      } else {
+        const half = sizePx / 2 / PPM;
+        body.createFixture(planck.Box(half, half), {
+          density: 1,
+          friction: 0.3,
+          restitution: 0.6,
+        });
+        return { body, type, sizePx };
+      }
+    };
   }, []);
 
   const onInit = (ctx: FrameContext) => {
-    shapesRef.current = Array.from({ length: 8 }, createRandomShape);
     const { ctx: g, width, height } = ctx;
+
+    // Create world
+    const world = planck.World(planck.Vec2(0, 10));
+    worldRef.current = world;
+    entitiesRef.current = [];
+    accumulatorRef.current = 0;
+
+    // World bounds (static edge fixtures)
+    const w = width / PPM;
+    const h = height / PPM;
+    const bounds = world.createBody();
+    bounds.createFixture(planck.Edge(planck.Vec2(0, 0), planck.Vec2(w, 0)));       // top
+    bounds.createFixture(planck.Edge(planck.Vec2(0, h), planck.Vec2(w, h)));       // bottom
+    bounds.createFixture(planck.Edge(planck.Vec2(0, 0), planck.Vec2(0, h)));       // left
+    bounds.createFixture(planck.Edge(planck.Vec2(w, 0), planck.Vec2(w, h)));       // right
+
+    // Initial entities
+    for (let i = 0; i < 8; i++) {
+      entitiesRef.current.push(createRandomEntity(width, height, world));
+    }
+
+    // Clear screen
     g.fillStyle = '#000000';
     g.fillRect(0, 0, width, height);
   };
 
   const onFrame = (ctx: FrameContext) => {
     const { ctx: g, width, height, dt } = ctx;
+    const world = worldRef.current;
+    if (!world) return;
+
+    // Fixed-step simulation
+    accumulatorRef.current += dt;
+    while (accumulatorRef.current >= timeStep) {
+      world.step(timeStep);
+      accumulatorRef.current -= timeStep;
+    }
+
     // Clear
     g.fillStyle = '#000000';
     g.fillRect(0, 0, width, height);
 
-    // Update and draw
-    shapesRef.current.forEach((shape) => {
-      shape.x += shape.vx * dt;
-      shape.y += shape.vy * dt;
-
-      if (shape.x - shape.radius < 0 || shape.x + shape.radius > width) {
-        shape.vx *= -0.9;
-        shape.x = Math.max(shape.radius, Math.min(width - shape.radius, shape.x));
-      }
-      if (shape.y - shape.radius < 0 || shape.y + shape.radius > height) {
-        shape.vy *= -0.9;
-        shape.y = Math.max(shape.radius, Math.min(height - shape.radius, shape.y));
-      }
-
-      g.fillStyle = '#ffffff';
-      g.strokeStyle = '#ffffff';
-      g.lineWidth = 2;
-      if (shape.type === 'circle') {
+    // Draw entities
+    g.fillStyle = '#ffffff';
+    g.strokeStyle = '#ffffff';
+    g.lineWidth = 2;
+    for (const ent of entitiesRef.current) {
+      const p = ent.body.getPosition();
+      const angle = ent.body.getAngle();
+      const x = p.x * PPM;
+      const y = p.y * PPM;
+      if (ent.type === 'circle' && ent.radiusPx) {
         g.beginPath();
-        g.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
+        g.arc(x, y, ent.radiusPx, 0, Math.PI * 2);
         g.fill();
-      } else {
-        const size = shape.radius * 1.4;
-        g.fillRect(shape.x - size / 2, shape.y - size / 2, size, size);
-      }
-    });
-
-    // collisions
-    for (let i = 0; i < shapesRef.current.length; i++) {
-      for (let j = i + 1; j < shapesRef.current.length; j++) {
-        const a = shapesRef.current[i];
-        const b = shapesRef.current[j];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < a.radius + b.radius) {
-          const nx = dx / distance;
-          const ny = dy / distance;
-          const relativeVelocity = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
-          if (relativeVelocity > 0) continue;
-          const impulse = 2 * relativeVelocity / 2;
-          a.vx -= impulse * nx;
-          a.vy -= impulse * ny;
-          b.vx += impulse * nx;
-          b.vy += impulse * ny;
-          const overlap = (a.radius + b.radius - distance) / 2;
-          a.x -= overlap * nx;
-          a.y -= overlap * ny;
-          b.x += overlap * nx;
-          b.y += overlap * ny;
-        }
+      } else if (ent.type === 'square' && ent.sizePx) {
+        const size = ent.sizePx;
+        g.save();
+        g.translate(x, y);
+        g.rotate(angle);
+        g.fillRect(-size / 2, -size / 2, size, size);
+        g.restore();
       }
     }
   };
@@ -98,15 +128,32 @@ export const BouncingShapesDemo = () => {
       onInit={onInit}
       onFrame={onFrame}
       onPointerDown={(_, p) => {
-        const newShape: Shape = {
-          x: p.x,
-          y: p.y,
-          vx: (Math.random() - 0.5) * 200,
-          vy: 300 + Math.random() * 200,
-          radius: Math.random() * 20 + 10,
-          type: Math.random() > 0.5 ? 'circle' : 'square'
-        };
-        shapesRef.current.push(newShape);
+        if (!worldRef.current) return;
+        const world = worldRef.current;
+        const type: ShapeType = Math.random() > 0.5 ? 'circle' : 'square';
+        const radiusPx = Math.random() * 20 + 10;
+        const sizePx = radiusPx * 1.4;
+        const body = world.createBody({
+          type: 'dynamic',
+          position: planck.Vec2(p.x / PPM, p.y / PPM),
+          linearVelocity: planck.Vec2((Math.random() - 0.5) * 4, 6 + Math.random() * 4),
+        });
+        if (type === 'circle') {
+          body.createFixture(planck.Circle(radiusPx / PPM), {
+            density: 1,
+            friction: 0.2,
+            restitution: 0.7,
+          });
+          entitiesRef.current.push({ body, type, radiusPx });
+        } else {
+          const half = sizePx / 2 / PPM;
+          body.createFixture(planck.Box(half, half), {
+            density: 1,
+            friction: 0.3,
+            restitution: 0.6,
+          });
+          entitiesRef.current.push({ body, type, sizePx });
+        }
       }}
     />
   );
