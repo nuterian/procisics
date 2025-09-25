@@ -46,7 +46,7 @@
   /* 8px for buttons */
   --spacing-grid: 1.25rem;
   /* 20px grid gap */
-  --spacing-panel: 1.125rem;
+  --spacing-panel: 2.5rem;
   /* 18px panel padding */
 
   /* Typography Scale */
@@ -255,11 +255,22 @@ body {
 }
 
 .help-panel {
-  @apply fixed top-20 left-4 p-4 rounded-lg border z-20;
+  @apply fixed pl-8 pr-8 pt-4 pb-4 rounded-lg border z-20;
   background: hsl(var(--card));
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
-  max-width: none;
+  box-sizing: border-box;
+  width: min(98vw, 980px);
+  max-width: 980px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 120px;
+  overflow: hidden;
+}
+
+.help-panel-inner {
+  width: 100%;
+  overflow-x: auto; /* safe horizontal scroll if needed */
 }
 
 .help-title {
@@ -277,22 +288,15 @@ body {
 
 /* Help panel: horizontal categories */
 .help-categories {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-panel);
 }
 
 .help-category {
   display: flex;
   flex-direction: column;
-  padding-right: var(--spacing-panel);
-  margin-right: var(--spacing-panel);
-  border-right: 1px solid hsl(var(--card-border));
-}
-
-.help-category:last-child {
-  border-right: none;
-  margin-right: 0;
-  padding-right: 0;
+  min-width: 270px;
 }
 
 .help-category-title {
@@ -305,8 +309,9 @@ body {
 
 .help-category-grid {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 0.75rem;
+  grid-template-columns: max-content 1fr;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
 }
 
 .help-row {
@@ -315,15 +320,26 @@ body {
 
 .help-keys {
   @apply flex items-center gap-1;
+  flex-shrink: 0;
 }
 
 .help-text {
   color: hsl(var(--card-foreground));
   font-size: var(--text-base);
+  text-align: right;
 }
 
-.help-text-right {
-  @apply text-right;
+.help-text-right { }
+
+.help-text { white-space: nowrap; }
+
+/* Multi-line key group for dense combos (e.g., Shapes / Random) */
+.help-keys-multi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100px;
 }
 
 /* Keycaps */
@@ -410,10 +426,23 @@ body {
   }
 
   .help-panel {
-    @apply left-2 right-2 top-20;
+    @apply left-2 right-2;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    top: 90px;
+    width: auto;
+    max-width: none;
   }
   .help-categories {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+  .help-categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

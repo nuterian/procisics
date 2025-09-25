@@ -1,5 +1,23 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Keyboard } from 'lucide-react';
+import {
+  Keyboard,
+  Circle as IconCircle,
+  Square as IconSquare,
+  Triangle as IconTriangle,
+  Wind as IconWind,
+  Magnet as IconMagnet,
+  Play,
+  RotateCcw,
+  Timer,
+  Bug,
+  X as IconX,
+  MousePointer,
+  Sparkles,
+  Trash2,
+  ArrowLeft as IconArrowLeft,
+  ArrowRight as IconArrowRight,
+  ArrowUp as IconArrowUp,
+} from 'lucide-react';
 import Hud from '@/components/Hud';
 
 export interface FrameContext {
@@ -257,7 +275,9 @@ export const DemoPage = ({
       {showHelp && (
         <div className="help-panel" role="dialog" aria-label="Hotkeys help">
           <h3 className="help-title"><Keyboard className="help-title-icon" /> Hotkeys</h3>
-          <HelpCategories />
+          <div className="help-panel-inner">
+            <HelpCategories />
+          </div>
         </div>
       )}
 
@@ -276,8 +296,12 @@ function Keycap({ label }: { label: string }) {
 }
 
 function HelpCategories() {
-  type HK = { keys: string | string[]; text: string };
-  const renderKeys = (keys: string | string[]) => {
+  type HK = { keys: string | string[] | JSX.Element; text: string };
+  const renderKeys = (keys: string | string[] | JSX.Element) => {
+    if (typeof keys !== 'string' && !Array.isArray(keys)) {
+      // Assume caller provides its own container classes
+      return keys as JSX.Element;
+    }
     if (Array.isArray(keys)) {
       return (
         <div className="help-keys">
@@ -301,40 +325,36 @@ function HelpCategories() {
     {
       title: 'Simulation',
       items: [
-        { keys: 'Space', text: 'Pause / Play' },
-        { keys: 'R', text: 'Reset' },
-        { keys: 'S', text: 'Toggle slow-mo' },
-        { keys: 'Q', text: 'Shake' },
-        { keys: 'F', text: 'Toggle debug' },
-        { keys: 'Esc', text: 'Close help' },
+        { keys: (<div className="help-keys"><Play className="help-title-icon" /> <Keycap label="Space" /></div>), text: 'Pause / Play' },
+        { keys: (<div className="help-keys"><RotateCcw className="help-title-icon" /> <Keycap label="R" /></div>), text: 'Reset' },
+        { keys: (<div className="help-keys"><Timer className="help-title-icon" /> <Keycap label="S" /></div>), text: 'Toggle slow-mo' },
+        { keys: (<div className="help-keys"><Bug className="help-title-icon" /> <Keycap label="F" /></div>), text: 'Toggle debug' },
+        { keys: (<div className="help-keys"><IconX className="help-title-icon" /> <Keycap label="Esc" /></div>), text: 'Close help' },
       ],
     },
     {
       title: 'Gravity',
       items: [
-        { keys: 'ArrowLeft', text: 'Tilt -5°' },
-        { keys: 'ArrowRight', text: 'Tilt +5°' },
-        { keys: 'ArrowUp', text: 'Reset tilt' },
+        { keys: (<div className="help-keys"><IconArrowLeft className="help-title-icon" /> <Keycap label="ArrowLeft" /></div>), text: 'Tilt -5°' },
+        { keys: (<div className="help-keys"><IconArrowRight className="help-title-icon" /> <Keycap label="ArrowRight" /></div>), text: 'Tilt +5°' },
+        { keys: (<div className="help-keys"><IconArrowUp className="help-title-icon" /> <Keycap label="ArrowUp" /></div>), text: 'Reset tilt' },
       ],
     },
     {
       title: 'Forces',
       items: [
-        { keys: 'W', text: 'Toggle wind' },
-        { keys: 'A', text: 'Toggle attractor' },
+        { keys: (<div className="help-keys"><IconWind className="help-title-icon" /> <Keycap label="W" /></div>), text: 'Wind on/off' },
+        { keys: (<div className="help-keys"><IconMagnet className="help-title-icon" /> <Keycap label="A" /></div>), text: 'Attractor on/off' },
+        { keys: (<div className="help-keys"><Sparkles className="help-title-icon" /> <Keycap label="Q" /></div>), text: 'Shake' },
       ],
     },
     {
       title: 'Spawning',
       items: [
-        { keys: 'Click', text: 'Spawn at cursor' },
-        { keys: ['Drag', 'Release'], text: 'Throw to spawn' },
-        { keys: 'B', text: 'Burst spawn' },
-        { keys: '1', text: 'Spawn Circle' },
-        { keys: '2', text: 'Spawn Box' },
-        { keys: '3', text: 'Spawn Triangle' },
-        { keys: '0', text: 'Spawn Random' },
-        { keys: 'X', text: 'Clear all' },
+        { keys: (<div className="help-keys"><MousePointer className="help-title-icon" /> <span>Click / Drag</span></div>), text: 'Spawn / Throw' },
+        { keys: (<div className="help-keys help-keys-multi"><IconCircle className="help-title-icon" /> <Keycap label="1" /> <IconSquare className="help-title-icon" /> <Keycap label="2" /> <IconTriangle className="help-title-icon" /> <Keycap label="3" /> <Keycap label="0" /></div>), text: 'Shapes / Random' },
+        { keys: (<div className="help-keys"><Sparkles className="help-title-icon" /> <Keycap label="B" /></div>), text: 'Burst spawn' },
+        { keys: (<div className="help-keys"><Trash2 className="help-title-icon" /> <Keycap label="X" /></div>), text: 'Clear all' },
       ],
     },
   ];
@@ -348,7 +368,7 @@ function HelpCategories() {
             {cat.items.map((hk, i) => (
               <div className="help-row" key={i}>
                 {renderKeys(hk.keys)}
-                <div className="help-text help-text-right">{hk.text}</div>
+                <div className="help-text">{hk.text}</div>
               </div>
             ))}
           </div>

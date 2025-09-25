@@ -16,6 +16,7 @@ import {
   applyUniformAcceleration,
   SHAPE_COLORS,
   type ShapeKind,
+  stepWorldWithForces,
 } from '@/lib/physics';
 
 // Configuration constants for physics simulation and UI behavior
@@ -356,6 +357,8 @@ export const BouncingShapesDemo = () => {
     g.fillRect(0, 0, width, height);
   };
 
+  const simTimeRef = useRef(0);
+
   const onFrame = (ctx: FrameContext) => {
     const { ctx: g, width, height, dt, time } = ctx;
     const world = worldRef.current;
@@ -364,22 +367,25 @@ export const BouncingShapesDemo = () => {
     // Update gravity based on tilt
     setGravityFromAngle(world, tiltDeg, 10);
 
-    // Apply wind force
-    if (windOn) {
-      const axPx = Math.sin(time * CONFIG.WIND_FREQUENCY) * CONFIG.WIND_AMPLITUDE;
-      applyUniformAcceleration(world, CONFIG.PPM, axPx, 0);
-    }
-
-    // Apply attractor force
-    if (attractorOn) {
-      const origin = lastPointerRef.current ?? { x: width / 2, y: height / 2 };
-      applyRadialForce(world, CONFIG.PPM, origin, CONFIG.ATTRACTOR_FORCE, 'attract');
-    }
-
-    // Fixed-step physics simulation
+    // Physics stepping with per-substep forces for consistent behavior
     const simDt = slowMo ? dt * CONFIG.SLOW_MO_FACTOR : dt;
-    accumulatorRef.current += simDt;
-    stepWithFixedTimestep(world, accumulatorRef, simDt, CONFIG.TIME_STEP);
+    stepWorldWithForces(
+      world,
+      accumulatorRef,
+      simDt,
+      CONFIG.TIME_STEP,
+      simTimeRef,
+      (simTime) => {
+        if (windOn) {
+          const axPx = Math.sin(simTime * CONFIG.WIND_FREQUENCY) * CONFIG.WIND_AMPLITUDE;
+          applyUniformAcceleration(world, CONFIG.PPM, axPx, 0);
+        }
+        if (attractorOn) {
+          const origin = lastPointerRef.current ?? { x: width / 2, y: height / 2 };
+          applyRadialForce(world, CONFIG.PPM, origin, CONFIG.ATTRACTOR_FORCE, 'attract');
+        }
+      }
+    );
 
     // Clear screen
     g.fillStyle = '#000000';

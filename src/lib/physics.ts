@@ -128,6 +128,9 @@ export function createCircleEntity(
       pixelsToMeters(options.vyPx ?? 0, pixelsPerMeter)
     ),
   })
+  // Per-shape damping (keeps motion natural while preventing runaway energy)
+  body.setLinearDamping(0.12)
+  body.setAngularDamping(0.12)
   body.createFixture(planck.Circle(pixelsToMeters(radiusPx, pixelsPerMeter)), {
     density: options.density ?? d.density,
     friction: options.friction ?? d.friction,
@@ -156,6 +159,8 @@ export function createBoxEntity(
       pixelsToMeters(options.vyPx ?? 0, pixelsPerMeter)
     ),
   })
+  body.setLinearDamping(0.22)
+  body.setAngularDamping(0.25)
   const half = pixelsToMeters(sizePx / 2, pixelsPerMeter)
   body.createFixture(planck.Box(half, half), {
     density: options.density ?? d.density,
@@ -185,6 +190,8 @@ export function createTriangleEntity(
       pixelsToMeters(options.vyPx ?? 0, pixelsPerMeter)
     ),
   })
+  body.setLinearDamping(0.16)
+  body.setAngularDamping(0.18)
   const s = pixelsToMeters(sizePx, pixelsPerMeter)
   const h = Math.sqrt(3) / 2 * s
   // Center at origin using centroid at (0,0)
@@ -212,6 +219,57 @@ export function stepWithFixedTimestep(
   while (accumulatorRef.current >= timeStepSeconds) {
     world.step(timeStepSeconds)
     accumulatorRef.current -= timeStepSeconds
+  }
+}
+
+/**
+ * Step the world using substeps and apply forces before each substep.
+ * Guarantees at least one step per frame so forces remain continuous.
+ * Returns total simulated seconds this call advanced.
+ */
+export function stepWorldWithForces(
+  world: planck.World,
+  accumulatorRef: { current: number },
+  dtSeconds: number,
+  timeStepSeconds: number,
+  simTimeRef: { current: number },
+  applyForces: (simTimeSeconds: number) => void,
+  afterStep?: () => void
+): number {
+  let advanced = 0
+  accumulatorRef.current += dtSeconds
+  // Perform fixed steps
+  while (accumulatorRef.current >= timeStepSeconds) {
+    applyForces(simTimeRef.current)
+    world.step(timeStepSeconds, 10, 6)
+    accumulatorRef.current -= timeStepSeconds
+    simTimeRef.current += timeStepSeconds
+    advanced += timeStepSeconds
+    if (afterStep) afterStep()
+  }
+  // Final partial step to avoid halting when accumulator is small
+  if (accumulatorRef.current > 0) {
+    const partial = accumulatorRef.current
+    applyForces(simTimeRef.current)
+    world.step(partial, 10, 6)
+    accumulatorRef.current = 0
+    simTimeRef.current += partial
+    advanced += partial
+    if (afterStep) afterStep()
+  }
+  return advanced
+}
+
+/** Clamp all dynamic body speeds in the world to a maximum (meters/second). */
+export function clampWorldSpeeds(world: planck.World, maxSpeedMps: number): void {
+  for (let b = world.getBodyList(); b; b = b.getNext()) {
+    if (!b.isDynamic()) continue
+    const v = b.getLinearVelocity()
+    const speed = Math.hypot(v.x, v.y)
+    if (speed > maxSpeedMps && speed > 0) {
+      const scale = maxSpeedMps / speed
+      b.setLinearVelocity(planck.Vec2(v.x * scale, v.y * scale))
+    }
   }
 }
 
