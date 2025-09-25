@@ -38,6 +38,9 @@
   --secondary-foreground: 0 0% 100%;
   --accent: 0 0% 13%;
   --accent-foreground: 0 0% 100%;
+  /* Bright success green (matches FPS counter accent) */
+  --success: 142 72% 45%; /* #22c55e */
+  --success-dark: 142 72% 35%; /* #16783c */
 
   /* Layout */
   --radius: 0.75rem;
@@ -494,3 +497,77 @@ body {
   height: 18px;
   color: hsl(var(--muted));
 }
+
+/* Minimal custom slider for HUD controls */
+.demo-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 140px;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Track */
+.demo-slider::-webkit-slider-runnable-track {
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--success)) 0%,
+    hsl(var(--success)) var(--percent, 50%),
+    hsl(var(--card-border)) var(--percent, 50%),
+    hsl(var(--card-border)) 100%
+  );
+  border-radius: 9999px;
+}
+.demo-slider::-moz-range-track {
+  height: 5px;
+  background: hsl(var(--card-border));
+  border-radius: 9999px;
+}
+/* Firefox filled portion */
+.demo-slider::-moz-range-progress {
+  height: 5px;
+  background: hsl(var(--success));
+  border-radius: 9999px;
+}
+
+/* Thumb */
+.demo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--card-border));
+  background: hsl(var(--success));
+  margin-top: -5.5px; /* centers thumb on 3px track (14/2 - 3/2) */
+  transition: var(--transition-micro);
+}
+.demo-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--card-border));
+  background: hsl(var(--success));
+  transition: var(--transition-micro);
+}
+
+/* Hover / Focus */
+.demo-slider:hover::-webkit-slider-thumb { background: hsl(var(--success-dark)); }
+.demo-slider:hover::-moz-range-thumb { background: hsl(var(--success-dark)); }
+
+.demo-slider:focus-visible { outline: none; }
+.demo-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.15);
+}
+.demo-slider:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.15);
+}
+
+/* Disabled */
+.demo-slider:disabled { cursor: not-allowed; opacity: 0.5; }
+
+/* Right controls spacing harmony */
+.demo-controls .control-group { margin-right: 1rem; }
+.demo-controls .control-group:last-child { margin-right: 0; }

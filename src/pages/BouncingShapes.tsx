@@ -411,16 +411,24 @@ export const BouncingShapesDemo = () => {
         <div className="demo-controls">
           {/* Minimal inline UI kept compact; keyboard remains primary */}
           <div className="control-group">
-            <input
-              aria-label="Tilt"
-              type="range"
-              min={-45}
-              max={45}
-              step={1}
-              value={tiltDeg}
-              onChange={(e) => setTiltDeg(parseInt(e.target.value, 10))}
-              style={{ width: 140 }}
-            />
+            {(() => {
+              const min = -45;
+              const max = 45;
+              const pct = ((tiltDeg - min) / (max - min)) * 100;
+              return (
+                <input
+                  aria-label="Tilt"
+                  type="range"
+                  min={min}
+                  max={max}
+                  step={1}
+                  value={tiltDeg}
+                  onChange={(e) => setTiltDeg(parseInt(e.target.value, 10))}
+                  className="demo-slider"
+                  style={{ ['--percent' as any]: `${pct}%` }}
+                />
+              );
+            })()}
           </div>
           <div className="indicator" aria-live="polite">
             <span className={"indicator-dot" + (windOn ? " active" : "")}></span>
