@@ -5,8 +5,8 @@ export function FpsCounter({ fps }: { fps: number }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const valuesRef = useRef<number[]>([]);
   const maxSamples = 60; // keep ~1s history at 60Hz
-  const width = 72; // CSS pixels
-  const height = 24; // CSS pixels
+  const width = 96; // CSS pixels
+  const height = 32; // CSS pixels
 
   // Device pixel ratio setup for crisp lines on HiDPI
   const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
@@ -38,15 +38,19 @@ export function FpsCounter({ fps }: { fps: number }) {
     ctx.lineWidth = 1 * dpr;
 
     // Baseline at 60 fps
-    ctx.strokeStyle = 'rgba(170,170,170,0.15)';
+    ctx.strokeStyle = 'rgba(170,170,170,0.20)';
     const baseY = Math.floor((1 - normalize(baselineFps)) * canvas.height) + 0.5;
     ctx.beginPath();
     ctx.moveTo(0, baseY);
     ctx.lineTo(canvas.width, baseY);
     ctx.stroke();
 
-    // Sparkline path
-    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    // Sparkline path with green gradient
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    grad.addColorStop(0, 'rgba(16, 120, 60, 0.7)');   // old (left) darker green
+    grad.addColorStop(1, 'rgba(34, 197, 94, 1.0)');   // new (right) bright green
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.5 * dpr;
     ctx.beginPath();
     const n = list.length;
     for (let i = 0; i < n; i++) {

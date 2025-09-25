@@ -8,7 +8,7 @@ import {
   Magnet as IconMagnet,
   Play,
   RotateCcw,
-  Timer,
+  Turtle,
   Bug,
   X as IconX,
   MousePointer,
@@ -43,7 +43,7 @@ interface DemoPageProps {
   rightControls?: React.ReactNode;
 }
 
-export const DemoPage = ({ 
+export const DemoPage = ({
   title,
   children,
   onInit,
@@ -253,13 +253,13 @@ export const DemoPage = ({
 
   return (
     <div className="demo-viewport">
-      <canvas 
+      <canvas
         ref={canvasRef}
         className="demo-canvas"
         aria-label={`${title} simulation`}
       />
-      
-      <Hud 
+
+      <Hud
         title={title}
         isPaused={isPaused}
         fps={fps}
@@ -327,7 +327,7 @@ function HelpCategories() {
       items: [
         { keys: (<div className="help-keys"><Play className="help-title-icon" /> <Keycap label="Space" /></div>), text: 'Pause / Play' },
         { keys: (<div className="help-keys"><RotateCcw className="help-title-icon" /> <Keycap label="R" /></div>), text: 'Reset' },
-        { keys: (<div className="help-keys"><Timer className="help-title-icon" /> <Keycap label="S" /></div>), text: 'Toggle slow-mo' },
+        { keys: (<div className="help-keys"><Turtle className="help-title-icon" /> <Keycap label="S" /></div>), text: 'Toggle slow-mo' },
         { keys: (<div className="help-keys"><Bug className="help-title-icon" /> <Keycap label="F" /></div>), text: 'Toggle debug' },
         { keys: (<div className="help-keys"><IconX className="help-title-icon" /> <Keycap label="Esc" /></div>), text: 'Close help' },
       ],

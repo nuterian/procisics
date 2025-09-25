@@ -420,7 +420,7 @@ export const BouncingShapesDemo = () => {
               step={1}
               value={tiltDeg}
               onChange={(e) => setTiltDeg(parseInt(e.target.value, 10))}
-              style={{ width: 120 }}
+              style={{ width: 140 }}
             />
           </div>
           <div className="indicator" aria-live="polite">

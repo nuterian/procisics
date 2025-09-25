@@ -48,6 +48,8 @@
   /* 20px grid gap */
   --spacing-panel: 2.5rem;
   /* 18px panel padding */
+  --hud-height: 48px;
+  /* shared overlay height */
 
   /* Typography Scale */
   --text-xs: 0.875rem;
@@ -162,10 +164,12 @@ body {
 }
 
 .demo-hud {
-  @apply fixed top-4 left-4 flex items-center gap-3 p-3 rounded-lg border z-10;
-  background: hsl(var(--card));
+  @apply fixed top-4 left-4 flex items-center gap-3 p-3 pl-6 pr-6 rounded-lg border z-10;
+  background: hsla(var(--card) / 0.72);
+  backdrop-filter: blur(8px);
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
+  min-height: var(--hud-height);
 }
 
 .demo-title {
@@ -226,27 +230,31 @@ body {
 
 /* Debug overlay (top-right container) */
 .debug-overlay {
-  @apply fixed top-4 right-4 z-20 rounded-lg border p-2 flex flex-col gap-2;
-  background: hsl(var(--card));
+  @apply fixed top-4 right-4 z-20 rounded-lg border p-3 pl-6 pr-6 flex flex-col gap-2;
+  background: hsla(var(--card) / 0.72);
+  backdrop-filter: blur(8px);
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
+  min-height: var(--hud-height);
+  display: flex;
+  align-items: center;
 }
 
 .debug-item {
   @apply flex items-center gap-2;
-  min-height: 2.25rem; /* match HUD icon button min-height */
+  min-height: var(--hud-height);
 }
 
 .debug-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   color: hsl(var(--muted));
 }
 
 .debug-value {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 0.875rem; /* match --text-xs scale visually but crisper */
+  font-size: 1rem;
   color: hsl(var(--foreground));
 }
 
@@ -255,8 +263,9 @@ body {
 }
 
 .help-panel {
-  @apply fixed pl-8 pr-8 pt-4 pb-4 rounded-lg border z-20;
-  background: hsl(var(--card));
+  @apply fixed p-6 pl-8 pr-8 rounded-lg border z-20;
+  background: hsla(var(--card) / 0.72);
+  backdrop-filter: blur(8px);
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
   box-sizing: border-box;
@@ -328,8 +337,6 @@ body {
   font-size: var(--text-base);
   text-align: right;
 }
-
-.help-text-right { }
 
 .help-text { white-space: nowrap; }
 
@@ -450,37 +457,40 @@ body {
 .demo-hud-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   margin-left: 0.75rem;
-  padding-left: 0.75rem;
+  padding-left: 1.25rem;
   border-left: 1px solid hsl(var(--card-border));
 }
 
 .indicator {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.45rem;
   color: hsl(var(--muted));
   font-size: 12px;
   margin-right: 1rem;
 }
 
+.indicator:last-child {
+  margin-right: 0;
+}
+
 .indicator-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 9999px;
   background: hsl(var(--muted));
   box-shadow: 0 0 0 1px hsl(var(--card-border));
 }
 
 .indicator-dot.active {
-  background: #22c55e; /* bright green */
-  width: 8px;
-  height: 8px;
+  background: #22c55e;
+  width: 10px;
+  height: 10px;
 }
 
 .indicator-icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   color: hsl(var(--muted));
 }
