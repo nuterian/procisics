@@ -373,7 +373,6 @@ export function applyImpulseAt(
   impulsePx: { x: number; y: number },
   radiusPx = 80
 ): void {
-  const radiusM = pixelsToMeters(radiusPx, pixelsPerMeter)
   const jx = pixelsToMeters(impulsePx.x, pixelsPerMeter)
   const jy = pixelsToMeters(impulsePx.y, pixelsPerMeter)
   for (let b = world.getBodyList(); b; b = b.getNext()) {

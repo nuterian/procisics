@@ -7,7 +7,6 @@ import {
   createCircleEntity,
   createBoxEntity,
   createTriangleEntity,
-  stepWithFixedTimestep,
   drawEntity,
   createRandomEntity as createRandomEntityHelper,
   setGravityFromAngle,
@@ -360,7 +359,7 @@ export const BouncingShapesDemo = () => {
   const simTimeRef = useRef(0);
 
   const onFrame = (ctx: FrameContext) => {
-    const { ctx: g, width, height, dt, time } = ctx;
+    const { ctx: g, width, height, dt } = ctx;
     const world = worldRef.current;
     if (!world) return;
 

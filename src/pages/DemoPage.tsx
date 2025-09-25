@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Keyboard,
   Circle as IconCircle,
@@ -296,11 +296,11 @@ function Keycap({ label }: { label: string }) {
 }
 
 function HelpCategories() {
-  type HK = { keys: string | string[] | JSX.Element; text: string };
-  const renderKeys = (keys: string | string[] | JSX.Element) => {
+  type HK = { keys: string | string[] | React.ReactNode; text: string };
+  const renderKeys = (keys: string | string[] | React.ReactNode) => {
     if (typeof keys !== 'string' && !Array.isArray(keys)) {
       // Assume caller provides its own container classes
-      return keys as JSX.Element;
+      return keys as React.ReactNode;
     }
     if (Array.isArray(keys)) {
       return (
