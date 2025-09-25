@@ -13,6 +13,7 @@ interface HudProps {
   onToggleHelp: () => void;
   showHelp: boolean;
   showDebug: boolean;
+  rightControls?: React.ReactNode;
 }
 
 export function Hud({
@@ -24,6 +25,7 @@ export function Hud({
   onToggleHelp,
   showHelp,
   showDebug,
+  rightControls,
 }: HudProps) {
   const withTooltip = (
     control: React.ReactNode,
@@ -88,7 +90,10 @@ export function Hud({
         'Help'
       )}
 
-      {/* Top-right debug overlay is rendered outside the left cluster */}
+      {/* Right-side controls slot with a visual separator from core controls */}
+      <div className="demo-hud-right">
+        {rightControls}
+      </div>
     </div>
     <DebugOverlay fps={fps} show={showDebug} />
     </>

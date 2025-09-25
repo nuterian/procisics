@@ -277,3 +277,117 @@ export function createRandomEntity(
 }
 
 
+// --- Interaction helpers ---
+
+/**
+ * Set gravity based on a tilt angle in degrees, keeping magnitude g.
+ * 0° means gravity points down; positive angles tilt to the right.
+ */
+export function setGravityFromAngle(world: planck.World, angleDeg: number, g = 10): void {
+  const a = (angleDeg * Math.PI) / 180
+  const gx = Math.sin(a) * g
+  const gy = Math.cos(a) * g
+  world.setGravity(planck.Vec2(gx, gy))
+}
+
+/** Apply a small random linear impulse to dynamic bodies for a shake effect. */
+export function applyWorldShake(
+  world: planck.World,
+  pixelsPerMeter: number,
+  intensityPx: number
+): void {
+  const ix = pixelsToMeters(intensityPx, pixelsPerMeter)
+  const iy = pixelsToMeters(intensityPx, pixelsPerMeter)
+  for (let b = world.getBodyList(); b; b = b.getNext()) {
+    if (b.isDynamic()) {
+      const jx = (Math.random() * 2 - 1) * ix
+      const jy = (Math.random() * 2 - 1) * iy
+      b.applyLinearImpulse(planck.Vec2(jx, jy), b.getWorldCenter(), true)
+    }
+  }
+}
+
+/** Apply a linear impulse at a screen-space point to nearby bodies (drag-to-throw or wand). */
+export function applyImpulseAt(
+  world: planck.World,
+  pixelsPerMeter: number,
+  pointPx: { x: number; y: number },
+  impulsePx: { x: number; y: number },
+  radiusPx = 80
+): void {
+  const radiusM = pixelsToMeters(radiusPx, pixelsPerMeter)
+  const jx = pixelsToMeters(impulsePx.x, pixelsPerMeter)
+  const jy = pixelsToMeters(impulsePx.y, pixelsPerMeter)
+  for (let b = world.getBodyList(); b; b = b.getNext()) {
+    if (!b.isDynamic()) continue
+    const c = b.getWorldCenter()
+    const cx = metersToPixels(c.x, pixelsPerMeter)
+    const cy = metersToPixels(c.y, pixelsPerMeter)
+    const dx = cx - pointPx.x
+    const dy = cy - pointPx.y
+    const dist = Math.hypot(dx, dy)
+    if (dist <= radiusPx) {
+      // Attenuate impulse by distance (linear falloff)
+      const falloff = 1 - dist / radiusPx
+      b.applyLinearImpulse(planck.Vec2(jx * falloff, jy * falloff), c, true)
+    }
+  }
+}
+
+/** Apply a radial force (attractor or repulsor) from a CSS-pixel origin. */
+export function applyRadialForce(
+  world: planck.World,
+  pixelsPerMeter: number,
+  originPx: { x: number; y: number },
+  strength: number,
+  mode: 'attract' | 'repel' = 'attract'
+): void {
+  for (let b = world.getBodyList(); b; b = b.getNext()) {
+    if (!b.isDynamic()) continue
+    const c = b.getWorldCenter()
+    const cx = metersToPixels(c.x, pixelsPerMeter)
+    const cy = metersToPixels(c.y, pixelsPerMeter)
+    let dx = originPx.x - cx
+    let dy = originPx.y - cy
+    const distPx = Math.hypot(dx, dy)
+    if (distPx < 1) continue
+    const nx = dx / distPx
+    const ny = dy / distPx
+    // linear falloff up to a reasonable radius
+    const maxRadiusPx = 300
+    const falloff = Math.max(0, 1 - Math.min(distPx, maxRadiusPx) / maxRadiusPx)
+    const s = (mode === 'attract' ? 1 : -1) * strength * falloff
+    const fxPx = nx * s
+    const fyPx = ny * s
+    const fx = pixelsToMeters(fxPx, pixelsPerMeter)
+    const fy = pixelsToMeters(fyPx, pixelsPerMeter)
+    b.applyForceToCenter(planck.Vec2(fx, fy), true)
+  }
+}
+
+/** Limit a body's linear speed in meters/second to keep stability. */
+export function clampBodySpeed(body: planck.Body, maxSpeedMps: number): void {
+  const v = body.getLinearVelocity()
+  const speed = Math.hypot(v.x, v.y)
+  if (speed > maxSpeedMps && speed > 0) {
+    const scale = maxSpeedMps / speed
+    body.setLinearVelocity(planck.Vec2(v.x * scale, v.y * scale))
+  }
+}
+
+/** Apply a uniform acceleration (px/s^2) to all dynamic bodies (e.g., wind). */
+export function applyUniformAcceleration(
+  world: planck.World,
+  pixelsPerMeter: number,
+  axPx: number,
+  ayPx: number
+): void {
+  const ax = pixelsToMeters(axPx, pixelsPerMeter)
+  const ay = pixelsToMeters(ayPx, pixelsPerMeter)
+  for (let b = world.getBodyList(); b; b = b.getNext()) {
+    if (!b.isDynamic()) continue
+    const m = b.getMass()
+    b.applyForceToCenter(planck.Vec2(ax * m, ay * m), true)
+  }
+}
+

@@ -255,10 +255,11 @@ body {
 }
 
 .help-panel {
-  @apply fixed top-20 left-4 p-4 rounded-lg border max-w-xs z-20;
+  @apply fixed top-20 left-4 p-4 rounded-lg border z-20;
   background: hsl(var(--card));
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
+  max-width: none;
 }
 
 .help-title {
@@ -274,15 +275,42 @@ body {
   color: hsl(var(--muted));
 }
 
-/* Redesigned help list */
-.help-grid {
-  @apply space-y-2;
+/* Help panel: horizontal categories */
+.help-categories {
+  display: flex;
+  gap: var(--spacing-panel);
+}
+
+.help-category {
+  display: flex;
+  flex-direction: column;
+  padding-right: var(--spacing-panel);
+  margin-right: var(--spacing-panel);
+  border-right: 1px solid hsl(var(--card-border));
+}
+
+.help-category:last-child {
+  border-right: none;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.help-category-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted));
+  margin-bottom: 0.5rem;
+}
+
+.help-category-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
 }
 
 .help-row {
-  @apply grid items-center;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 0.75rem;
+  display: contents;
 }
 
 .help-keys {
@@ -297,8 +325,6 @@ body {
 .help-text-right {
   @apply text-right;
 }
-
-/* Removed icon column */
 
 /* Keycaps */
 .keycap {
@@ -386,4 +412,46 @@ body {
   .help-panel {
     @apply left-2 right-2 top-20;
   }
+  .help-categories {
+    flex-direction: column;
+  }
+}
+
+/* HUD right area and indicators */
+.demo-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid hsl(var(--card-border));
+}
+
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: hsl(var(--muted));
+  font-size: 12px;
+  margin-right: 1rem;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  box-shadow: 0 0 0 1px hsl(var(--card-border));
+}
+
+.indicator-dot.active {
+  background: #22c55e; /* bright green */
+  width: 8px;
+  height: 8px;
+}
+
+.indicator-icon {
+  width: 14px;
+  height: 14px;
+  color: hsl(var(--muted));
 }

@@ -19,6 +19,10 @@ interface DemoPageProps {
   onFrame: (ctx: FrameContext) => void;
   enableKeyboardShortcuts?: boolean;
   onPointerDown?: (ctx: FrameContext, pointer: { x: number; y: number; button: number }) => void;
+  onPointerMove?: (ctx: FrameContext, pointer: { x: number; y: number; buttons: number }) => void;
+  onPointerUp?: (ctx: FrameContext, pointer: { x: number; y: number; button: number }) => void;
+  onKeyDown?: (e: KeyboardEvent, ctx: FrameContext | null) => void;
+  rightControls?: React.ReactNode;
 }
 
 export const DemoPage = ({ 
@@ -27,7 +31,11 @@ export const DemoPage = ({
   onInit,
   onFrame,
   enableKeyboardShortcuts = true,
-  onPointerDown
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onKeyDown,
+  rightControls
 }: DemoPageProps) => {
   const [showHelp, setShowHelp] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -40,6 +48,16 @@ export const DemoPage = ({
   const startTimeRef = useRef<number>(0);
   const frameCtxRef = useRef<FrameContext | null>(null);
   const isPausedRef = useRef<boolean>(false);
+  const onFrameRef = useRef(onFrame);
+  const onInitRef = useRef(onInit);
+
+  useEffect(() => {
+    onFrameRef.current = onFrame;
+  }, [onFrame]);
+
+  useEffect(() => {
+    onInitRef.current = onInit;
+  }, [onInit]);
 
   const ensureCanvasSize = useMemo(() => {
     return () => {
@@ -84,8 +102,8 @@ export const DemoPage = ({
     // Initialize lifecycle and timing
     startTimeRef.current = performance.now();
     lastTimeRef.current = startTimeRef.current;
-    if (onInit && frameCtxRef.current) {
-      onInit(frameCtxRef.current);
+    if (onInitRef.current && frameCtxRef.current) {
+      onInitRef.current(frameCtxRef.current);
     }
 
     const animate = (now: number) => {
@@ -102,7 +120,7 @@ export const DemoPage = ({
         const t = (now - startTimeRef.current) / 1000;
         frameCtxRef.current.time = t;
         frameCtxRef.current.dt = dt;
-        onFrame(frameCtxRef.current);
+        onFrameRef.current(frameCtxRef.current);
         lastTimeRef.current = now;
       }
       animationRef.current = requestAnimationFrame(animate);
@@ -116,7 +134,7 @@ export const DemoPage = ({
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, [onInit, onFrame, ensureCanvasSize]);
+  }, [ensureCanvasSize]);
 
   // Keep a ref of the paused state so the animation loop sees updates
   useEffect(() => {
@@ -125,21 +143,46 @@ export const DemoPage = ({
 
   // Wire pointer down on the canvas and map to canvas space (CSS pixels)
   useEffect(() => {
-    if (!onPointerDown) return;
+    if (!onPointerDown && !onPointerMove && !onPointerUp) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const handlePointerDown = (e: PointerEvent) => {
-      if (!frameCtxRef.current) return;
+    const toPointer = (e: PointerEvent) => {
+      if (!frameCtxRef.current) return null;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      onPointerDown(frameCtxRef.current, { x, y, button: e.button });
+      return { x, y };
+    };
+    const handlePointerDown = (e: PointerEvent) => {
+      if (!frameCtxRef.current) return;
+      if (!onPointerDown) return;
+      const p = toPointer(e);
+      if (!p) return;
+      onPointerDown(frameCtxRef.current, { x: p.x, y: p.y, button: e.button });
+    };
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!frameCtxRef.current) return;
+      if (!onPointerMove) return;
+      const p = toPointer(e);
+      if (!p) return;
+      onPointerMove(frameCtxRef.current, { x: p.x, y: p.y, buttons: e.buttons });
+    };
+    const handlePointerUp = (e: PointerEvent) => {
+      if (!frameCtxRef.current) return;
+      if (!onPointerUp) return;
+      const p = toPointer(e);
+      if (!p) return;
+      onPointerUp(frameCtxRef.current, { x: p.x, y: p.y, button: e.button });
     };
     canvas.addEventListener('pointerdown', handlePointerDown);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerup', handlePointerUp);
     return () => {
       canvas.removeEventListener('pointerdown', handlePointerDown);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      canvas.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [onPointerDown]);
+  }, [onPointerDown, onPointerMove, onPointerUp]);
 
   useEffect(() => {
     if (!enableKeyboardShortcuts) return;
@@ -156,8 +199,8 @@ export const DemoPage = ({
         // Re-init state
         startTimeRef.current = performance.now();
         lastTimeRef.current = startTimeRef.current;
-        if (onInit && frameCtxRef.current) {
-          onInit(frameCtxRef.current);
+        if (onInitRef.current && frameCtxRef.current) {
+          onInitRef.current(frameCtxRef.current);
         }
       }
       if (key === 'h') {
@@ -166,10 +209,13 @@ export const DemoPage = ({
       if (key === 'f') {
         setShowDebug((s) => !s);
       }
+      if (onKeyDown) {
+        onKeyDown(e, frameCtxRef.current);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [enableKeyboardShortcuts, onInit]);
+  }, [enableKeyboardShortcuts, onInit, onKeyDown]);
 
   const handlePause = () => {
     setIsPaused(!isPaused);
@@ -204,13 +250,14 @@ export const DemoPage = ({
         onToggleHelp={toggleHelp}
         showHelp={showHelp}
         showDebug={showDebug}
+        rightControls={rightControls}
       />
 
       {/* Help Panel */}
       {showHelp && (
         <div className="help-panel" role="dialog" aria-label="Hotkeys help">
           <h3 className="help-title"><Keyboard className="help-title-icon" /> Hotkeys</h3>
-          <HelpList />
+          <HelpCategories />
         </div>
       )}
 
@@ -228,15 +275,8 @@ function Keycap({ label }: { label: string }) {
   return <span className={className}>{display}</span>;
 }
 
-function HelpList() {
-  const hotkeys: Array<{ keys: string | string[]; text: string }> = [
-    { keys: 'Space', text: 'Pause / Play' },
-    { keys: 'R', text: 'Reset' },
-    { keys: 'H', text: 'Toggle help' },
-    { keys: 'F', text: 'Toggle debug' },
-    { keys: 'Esc', text: 'Close help' },
-  ];
-
+function HelpCategories() {
+  type HK = { keys: string | string[]; text: string };
   const renderKeys = (keys: string | string[]) => {
     if (Array.isArray(keys)) {
       return (
@@ -257,12 +297,61 @@ function HelpList() {
     );
   };
 
+  const categories: Array<{ title: string; items: HK[] }> = [
+    {
+      title: 'Simulation',
+      items: [
+        { keys: 'Space', text: 'Pause / Play' },
+        { keys: 'R', text: 'Reset' },
+        { keys: 'S', text: 'Toggle slow-mo' },
+        { keys: 'Q', text: 'Shake' },
+        { keys: 'F', text: 'Toggle debug' },
+        { keys: 'Esc', text: 'Close help' },
+      ],
+    },
+    {
+      title: 'Gravity',
+      items: [
+        { keys: 'ArrowLeft', text: 'Tilt -5°' },
+        { keys: 'ArrowRight', text: 'Tilt +5°' },
+        { keys: 'ArrowUp', text: 'Reset tilt' },
+      ],
+    },
+    {
+      title: 'Forces',
+      items: [
+        { keys: 'W', text: 'Toggle wind' },
+        { keys: 'A', text: 'Toggle attractor' },
+      ],
+    },
+    {
+      title: 'Spawning',
+      items: [
+        { keys: 'Click', text: 'Spawn at cursor' },
+        { keys: ['Drag', 'Release'], text: 'Throw to spawn' },
+        { keys: 'B', text: 'Burst spawn' },
+        { keys: '1', text: 'Spawn Circle' },
+        { keys: '2', text: 'Spawn Box' },
+        { keys: '3', text: 'Spawn Triangle' },
+        { keys: '0', text: 'Spawn Random' },
+        { keys: 'X', text: 'Clear all' },
+      ],
+    },
+  ];
+
   return (
-    <div className="help-grid">
-      {hotkeys.map((hk, idx) => (
-        <div className="help-row" key={idx}>
-          {renderKeys(hk.keys)}
-          <div className="help-text help-text-right">{hk.text}</div>
+    <div className="help-categories">
+      {categories.map((cat, idx) => (
+        <div className="help-category" key={idx}>
+          <div className="help-category-title">{cat.title}</div>
+          <div className="help-category-grid">
+            {cat.items.map((hk, i) => (
+              <div className="help-row" key={i}>
+                {renderKeys(hk.keys)}
+                <div className="help-text help-text-right">{hk.text}</div>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
