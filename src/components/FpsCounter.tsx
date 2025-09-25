@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Gauge } from 'lucide-react';
 
-export function FpsCounter({ fps }: { fps: number }) {
+interface FpsCounterProps {
+  fps: number;
+  windowMs?: number;  // time window for running average (default 1500ms)
+  rangeFps?: number;  // range around average (default 20 FPS)
+}
+
+export function FpsCounter({ fps, windowMs = 1500, rangeFps = 20 }: FpsCounterProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const valuesRef = useRef<number[]>([]);
-  const maxSamples = 60; // keep ~1s history at 60Hz
+  const samplesRef = useRef<Array<{ t: number; fps: number }>>([]);
+  const maxSamples = 600; // safety cap on array length
   const width = 96; // CSS pixels
-  const height = 32; // CSS pixels
+  const height = 24; // CSS pixels
 
   // Device pixel ratio setup for crisp lines on HiDPI
   const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
@@ -14,9 +20,20 @@ export function FpsCounter({ fps }: { fps: number }) {
   const canvasHeight = useMemo(() => Math.floor(height * dpr), [dpr]);
 
   useEffect(() => {
-    const list = valuesRef.current;
-    list.push(fps);
-    if (list.length > maxSamples) list.shift();
+    const now = performance.now();
+    const samples = samplesRef.current;
+    
+    // Add new sample
+    samples.push({ t: now, fps });
+    
+    // Prune old samples by time window
+    const cutoff = now - windowMs;
+    samplesRef.current = samples.filter(s => s.t >= cutoff);
+    
+    // Safety cap on array length
+    if (samplesRef.current.length > maxSamples) {
+      samplesRef.current = samplesRef.current.slice(-maxSamples);
+    }
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -27,19 +44,20 @@ export function FpsCounter({ fps }: { fps: number }) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Parameters
-    const baselineFps = 60;
-    const minFps = 0;
-    const maxFps = 75; // clamp to reduce jitter
+    // Compute running average and dynamic bounds
+    const list = samplesRef.current;
+    const avg = list.length ? list.reduce((a, s) => a + s.fps, 0) / list.length : fps;
+    const minFps = Math.max(0, avg - rangeFps);
+    const maxFps = Math.max(minFps + 1, avg + rangeFps); // avoid zero span
 
     const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
     const normalize = (v: number) => (clamp(v, minFps, maxFps) - minFps) / (maxFps - minFps);
 
     ctx.lineWidth = 1 * dpr;
 
-    // Baseline at 60 fps
+    // Baseline at running average
     ctx.strokeStyle = 'rgba(170,170,170,0.20)';
-    const baseY = Math.floor((1 - normalize(baselineFps)) * canvas.height) + 0.5;
+    const baseY = Math.floor((1 - normalize(avg)) * canvas.height) + 0.5;
     ctx.beginPath();
     ctx.moveTo(0, baseY);
     ctx.lineTo(canvas.width, baseY);
@@ -47,19 +65,22 @@ export function FpsCounter({ fps }: { fps: number }) {
 
     // Sparkline path with green gradient
     const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    grad.addColorStop(0, 'rgba(16, 120, 60, 0.7)');   // old (left) darker green
+    grad.addColorStop(0, 'rgba(16, 120, 60, 0.1)');   // old (left) darker green
+    grad.addColorStop(0.5, 'rgba(34, 197, 94, 0.9)');   // new (right) bright green
     grad.addColorStop(1, 'rgba(34, 197, 94, 1.0)');   // new (right) bright green
     ctx.strokeStyle = grad;
-    ctx.lineWidth = 1.5 * dpr;
+    ctx.lineWidth = 3.5 * dpr;
     ctx.beginPath();
-    const n = list.length;
-    for (let i = 0; i < n; i++) {
-      const x = Math.floor((i / Math.max(1, maxSamples - 1)) * canvas.width) + 0.5;
-      const y = Math.floor((1 - normalize(list[i])) * canvas.height) + 0.5;
+    
+    // Map x-coordinates by time across the window
+    const start = Math.max(0, now - windowMs);
+    for (let i = 0; i < list.length; i++) {
+      const x = Math.floor(((list[i].t - start) / windowMs) * canvas.width) + 0.5;
+      const y = Math.floor((1 - normalize(list[i].fps)) * canvas.height) + 0.5;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
-  }, [fps, dpr]);
+  }, [fps, dpr, windowMs, rangeFps]);
 
   return (
     <div className="debug-item" aria-label="Frames per second">
