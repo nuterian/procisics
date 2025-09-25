@@ -15,6 +15,7 @@ import {
   applyWorldShake,
   applyUniformAcceleration,
   SHAPE_COLORS,
+  type ShapeKind,
 } from '@/lib/physics';
 
 export const BouncingShapesDemo = () => {
@@ -31,6 +32,11 @@ export const BouncingShapesDemo = () => {
   const [windOn, setWindOn] = useState(false);
   const [attractorOn, setAttractorOn] = useState(false);
   const [slowMo, setSlowMo] = useState(false);
+  const rollRandomKind = (): ShapeKind => {
+    const r = Math.random();
+    return r < 1 / 3 ? 'circle' : r < 2 / 3 ? 'box' : 'triangle';
+  };
+  const [nextRandomKind, setNextRandomKind] = useState<ShapeKind>(rollRandomKind());
 
   const PPM = 50; // pixels per meter
   const timeStep = 1 / 60;
@@ -119,18 +125,19 @@ export const BouncingShapesDemo = () => {
     if (pointer) {
       g.save();
       g.globalAlpha = 0.35;
-      const color = spawnKind === 'circle' ? SHAPE_COLORS.circle : spawnKind === 'box' ? SHAPE_COLORS.box : spawnKind === 'triangle' ? SHAPE_COLORS.triangle : '#888888';
+      const ghostKind = spawnKind === 'random' ? nextRandomKind : spawnKind;
+      const color = ghostKind === 'circle' ? SHAPE_COLORS.circle : ghostKind === 'box' ? SHAPE_COLORS.box : ghostKind === 'triangle' ? SHAPE_COLORS.triangle : '#888888';
       g.fillStyle = color;
       g.strokeStyle = color;
-      if (spawnKind === 'circle') {
+      if (ghostKind === 'circle') {
         const r = 22;
         g.beginPath();
         g.arc(pointer.x, pointer.y, r, 0, Math.PI * 2);
         g.fill();
-      } else if (spawnKind === 'box') {
+      } else if (ghostKind === 'box') {
         const s = 30;
         g.fillRect(pointer.x - s / 2, pointer.y - s / 2, s, s);
-      } else if (spawnKind === 'triangle') {
+      } else if (ghostKind === 'triangle') {
         const s = 30;
         const h = Math.sqrt(3) / 2 * s;
         g.beginPath();
@@ -138,11 +145,6 @@ export const BouncingShapesDemo = () => {
         g.lineTo(pointer.x - s / 2, pointer.y - (1 / 3) * h);
         g.lineTo(pointer.x + s / 2, pointer.y - (1 / 3) * h);
         g.closePath();
-        g.fill();
-      } else {
-        // random unknown indicator
-        g.beginPath();
-        g.arc(pointer.x, pointer.y, 6, 0, Math.PI * 2);
         g.fill();
       }
       g.restore();
@@ -194,22 +196,8 @@ export const BouncingShapesDemo = () => {
       )}
       onPointerDown={(_, p) => {
         if (!worldRef.current) return;
-        const world = worldRef.current;
         lastPointerRef.current = { x: p.x, y: p.y };
         dragRef.current.start = { x: p.x, y: p.y, t: performance.now() };
-        const radiusPx = Math.random() * 20 + 15;
-        const sizePx = radiusPx * 1.4;
-        const vel = { vxPx: (Math.random() - 0.5) * 120, vyPx: 200 + Math.random() * 160 };
-        const spawn = (kind: typeof spawnKind) => {
-          if (kind === 'circle') return entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
-          if (kind === 'box') return entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
-          if (kind === 'triangle') return entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
-          const r = Math.random();
-          if (r < 1 / 3) return entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
-          if (r < 2 / 3) return entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
-          return entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
-        };
-        spawn(spawnKind);
       }}
       onPointerMove={(_, p) => {
         lastPointerRef.current = { x: p.x, y: p.y };
@@ -223,16 +211,33 @@ export const BouncingShapesDemo = () => {
         const vyPx = (p.y - start.y) / (dtMs / 1000);
         if (!worldRef.current) return;
         const world = worldRef.current;
+        const CLICK_THRESHOLD_MS = 150;
+        const kindToSpawn: 'circle' | 'box' | 'triangle' = (spawnKind === 'random' ? nextRandomKind : spawnKind) as 'circle' | 'box' | 'triangle';
         const radiusPx = Math.random() * 20 + 15;
         const sizePx = radiusPx * 1.4;
-        const vel = { vxPx: vxPx * 0.6, vyPx: vyPx * 0.6 };
-        const r = Math.random();
-        if (spawnKind === 'circle' || (spawnKind === 'random' && r < 1 / 3)) {
-          entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
-        } else if (spawnKind === 'box' || (spawnKind === 'random' && r < 2 / 3)) {
-          entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
+        if (dtMs <= CLICK_THRESHOLD_MS) {
+          // Click-to-drop
+          const vel = { vxPx: (Math.random() - 0.5) * 120, vyPx: 200 + Math.random() * 160 };
+          if (kindToSpawn === 'circle') {
+            entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
+          } else if (kindToSpawn === 'box') {
+            entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
+          } else {
+            entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
+          }
         } else {
-          entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
+          // Drag-to-throw
+          const vel = { vxPx: vxPx * 0.6, vyPx: vyPx * 0.6 };
+          if (kindToSpawn === 'circle') {
+            entitiesRef.current.push(createCircleEntity(world, PPM, p.x, p.y, radiusPx, vel));
+          } else if (kindToSpawn === 'box') {
+            entitiesRef.current.push(createBoxEntity(world, PPM, p.x, p.y, sizePx, vel));
+          } else {
+            entitiesRef.current.push(createTriangleEntity(world, PPM, p.x, p.y, sizePx, vel));
+          }
+        }
+        if (spawnKind === 'random') {
+          setNextRandomKind(rollRandomKind());
         }
       }}
       onKeyDown={(e) => {
@@ -243,7 +248,10 @@ export const BouncingShapesDemo = () => {
         if (k === '1') setSpawnKind('circle');
         if (k === '2') setSpawnKind('box');
         if (k === '3') setSpawnKind('triangle');
-        if (k === '0') setSpawnKind('random');
+        if (k === '0') {
+          setSpawnKind('random');
+          setNextRandomKind(rollRandomKind());
+        }
         if (k === 'w') setWindOn((s) => !s);
         if (k === 'a') setAttractorOn((s) => !s);
         if (k === 's') setSlowMo((s) => !s);
