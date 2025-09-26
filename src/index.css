@@ -479,10 +479,11 @@ body {
   border-radius: var(--radius);
   background: hsla(var(--card) / 0.72);
   backdrop-filter: blur(8px);
-  padding: 0.75rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   min-height: var(--hud-height);
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 /* Make debug overlay behave as block within stack */
@@ -530,7 +531,7 @@ body {
 .demo-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 140px;
+  width: 130px;
   height: 24px;
   background: transparent;
   cursor: pointer;
@@ -596,6 +597,61 @@ body {
 /* Disabled */
 .demo-slider:disabled { cursor: not-allowed; opacity: 0.5; }
 
-/* Right controls spacing harmony */
-.demo-controls .control-group { margin-right: 1rem; }
-.demo-controls .control-group:last-child { margin-right: 0; }
+/* Toggle button base styles */
+.toggle-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-sm);
+  background: hsl(var(--button-bg));
+  transition: var(--transition-micro);
+  cursor: pointer;
+}
+
+.toggle-icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Toggle states */
+.toggle-icon-button.on {
+  background: hsl(var(--success));
+  border-color: hsl(var(--success));
+}
+
+.toggle-icon-button.on svg {
+  color: hsl(var(--background));
+}
+
+.toggle-icon-button.off {
+  background: hsl(var(--card-border));
+}
+
+.toggle-icon-button.off svg {
+  color: hsl(var(--foreground));
+}
+
+.toggle-icon-button.off:hover {
+  outline: 2px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+.toggle-icon-button:focus-visible {
+  outline: 3px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+/* Physics control styling */
+.physics-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.physics-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

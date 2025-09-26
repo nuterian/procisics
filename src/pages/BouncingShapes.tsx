@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { Wind, Magnet, Turtle } from 'lucide-react';
 import DemoPage, { type FrameContext } from './DemoPage';
+import PhysicsControlGroup from '@/components/PhysicsControlGroup';
+import PhysicsToggle from '@/components/PhysicsToggle';
 import {
   createWorld,
   createBounds,
@@ -409,7 +411,7 @@ export const BouncingShapesDemo = () => {
       onFrame={onFrame}
       rightControls={(
         <div className="demo-controls">
-          {/* Minimal inline UI kept compact; keyboard remains primary */}
+          {/* Gravity tilt slider */}
           <div className="control-group">
             {(() => {
               const min = -45;
@@ -430,27 +432,31 @@ export const BouncingShapesDemo = () => {
               );
             })()}
           </div>
-          <div className="indicator" aria-live="polite">
-            <span className={"indicator-dot" + (windOn ? " active" : "")}></span>
-            <div className="help-keys" title="Wind (toggle with W)">
-              <Wind className="indicator-icon" />
-              <span className="sr-only">Wind</span>
-            </div>
-          </div>
-          <div className="indicator" aria-live="polite">
-            <span className={"indicator-dot" + (attractorOn ? " active" : "")}></span>
-            <div className="help-keys" title="Attractor (toggle with A)">
-              <Magnet className="indicator-icon" />
-              <span className="sr-only">Attractor</span>
-            </div>
-          </div>
-          <div className="indicator" aria-live="polite">
-            <span className={"indicator-dot" + (slowMo ? " active" : "")}></span>
-            <div className="help-keys" title="Slow-mo (toggle with S)">
-              <Turtle className="indicator-icon" />
-              <span className="sr-only">Slow-mo</span>
-            </div>
-          </div>
+          
+          {/* Physics toggles */}
+          <PhysicsControlGroup>
+            <PhysicsToggle 
+              label="Wind" 
+              pressed={windOn} 
+              onToggle={() => setWindOn(s => !s)}
+              icon={<Wind />}
+              testId="wind-toggle"
+            />
+            <PhysicsToggle 
+              label="Attractor" 
+              pressed={attractorOn} 
+              onToggle={() => setAttractorOn(s => !s)}
+              icon={<Magnet />}
+              testId="attractor-toggle"
+            />
+            <PhysicsToggle 
+              label="Slow-mo" 
+              pressed={slowMo} 
+              onToggle={() => setSlowMo(s => !s)}
+              icon={<Turtle />}
+              testId="slowmo-toggle"
+            />
+          </PhysicsControlGroup>
         </div>
       )}
       onPointerDown={(_, p) => handlePointerDown(worldRef.current, lastPointerRef, dragRef, p)}
