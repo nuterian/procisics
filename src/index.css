@@ -272,8 +272,8 @@ body {
   border-color: hsl(var(--card-border));
   border-radius: var(--radius);
   box-sizing: border-box;
-  width: min(98vw, 980px);
-  max-width: 580px;
+  width: min(100vw, 600px);
+  max-width: 600px;
   left: 50%;
   transform: translateX(-50%);
   top: 120px;
@@ -303,7 +303,7 @@ body {
 .help-categories {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 3rem;
+  gap: 2rem;
 }
 
 .help-category {
