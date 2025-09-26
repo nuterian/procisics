@@ -2,30 +2,23 @@ import { Pause, Play, RotateCcw, HelpCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { FpsCounter } from '@/components/FpsCounter';
 
 interface HudProps {
   title: string;
   isPaused: boolean;
-  fps: number;
   onTogglePause: () => void;
   onReset: () => void;
   onToggleHelp: () => void;
   showHelp: boolean;
-  showDebug: boolean;
-  rightControls?: React.ReactNode;
 }
 
 export function Hud({
   title,
   isPaused,
-  fps,
   onTogglePause,
   onReset,
   onToggleHelp,
   showHelp,
-  showDebug,
-  rightControls,
 }: HudProps) {
   const withTooltip = (
     control: React.ReactNode,
@@ -40,7 +33,6 @@ export function Hud({
   );
 
   return (
-    <>
     <div className="demo-hud">
       {withTooltip(
         <Button asChild variant="outline" size="icon" aria-label="Back to home">
@@ -89,26 +81,10 @@ export function Hud({
         </Button>,
         'Help'
       )}
-
-      {/* Right-side controls slot with a visual separator from core controls */}
-      <div className="demo-hud-right">
-        {rightControls}
-      </div>
     </div>
-    <DebugOverlay fps={fps} show={showDebug} />
-    </>
   );
 }
 
 export default Hud;
-
-export function DebugOverlay({ fps, show }: { fps: number; show: boolean }) {
-  if (!show) return null;
-  return (
-    <div className="debug-overlay" aria-label="Debug overlay">
-      <FpsCounter fps={fps} />
-    </div>
-  );
-}
 
 

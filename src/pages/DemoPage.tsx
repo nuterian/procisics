@@ -19,6 +19,9 @@ import {
   ArrowUp as IconArrowUp,
 } from 'lucide-react';
 import Hud from '@/components/Hud';
+import TopRightStack from '@/components/TopRightStack';
+import SceneControlsPanel from '@/components/SceneControlsPanel';
+import DebugOverlay from '@/components/DebugOverlay';
 
 export interface FrameContext {
   canvas: HTMLCanvasElement;
@@ -262,14 +265,18 @@ export const DemoPage = ({
       <Hud
         title={title}
         isPaused={isPaused}
-        fps={fps}
         onTogglePause={handlePause}
         onReset={handleReset}
         onToggleHelp={toggleHelp}
         showHelp={showHelp}
-        showDebug={showDebug}
-        rightControls={rightControls}
       />
+
+      <TopRightStack>
+        {rightControls ? (
+          <SceneControlsPanel>{rightControls}</SceneControlsPanel>
+        ) : null}
+        <DebugOverlay fps={fps} show={showDebug} />
+      </TopRightStack>
 
       {/* Help Panel */}
       {showHelp && (

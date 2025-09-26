@@ -435,6 +435,12 @@ body {
     @apply left-2 right-2 top-2 flex-wrap;
   }
 
+  .demo-right {
+    top: 0.5rem;
+    right: 0.5rem;
+    gap: 0.5rem;
+  }
+
   .help-panel {
     @apply left-2 right-2;
     left: 1rem;
@@ -456,13 +462,35 @@ body {
   }
 }
 
-/* HUD right area and indicators */
-.demo-hud-right {
+/* Top-right stack container */
+.demo-right {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 0.5rem;
+  z-index: 20;
+}
+
+/* Scene controls panel */
+.scene-controls-panel {
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius);
+  background: hsla(var(--card) / 0.72);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1.5rem;
+  min-height: var(--hud-height);
   display: flex;
   align-items: center;
-  margin-left: 0.75rem;
-  padding-left: 1.25rem;
-  border-left: 1px solid hsl(var(--card-border));
+}
+
+/* Make debug overlay behave as block within stack */
+.demo-right .debug-overlay {
+  position: static;
+  top: auto;
+  right: auto;
+  margin: 0;
 }
 
 .indicator {
