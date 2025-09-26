@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToggleIconButton } from '@/components/ui/toggle-icon-button';
+import { ToggleIconButton } from '@/components/ToggleIconButton';
 
 interface PhysicsToggleProps {
   label: string;
