@@ -273,7 +273,7 @@ body {
   border-radius: var(--radius);
   box-sizing: border-box;
   width: min(98vw, 980px);
-  max-width: 980px;
+  max-width: 580px;
   left: 50%;
   transform: translateX(-50%);
   top: 120px;
@@ -286,7 +286,8 @@ body {
 }
 
 .help-title {
-  @apply mb-3 flex items-center gap-2;
+  @apply mb-4 flex items-center justify-center gap-2;
+  text-align: center;
   font-size: var(--text-base);
   color: hsl(var(--muted));
   letter-spacing: 0.02em;
@@ -301,14 +302,14 @@ body {
 /* Help panel: horizontal categories */
 .help-categories {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacing-panel);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3rem;
 }
 
 .help-category {
   display: flex;
   flex-direction: column;
-  min-width: 270px;
+  min-width: 240px;
 }
 
 .help-category-title {
@@ -451,16 +452,10 @@ body {
     max-width: none;
   }
   .help-categories {
-    display: grid;
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 1024px) and (min-width: 641px) {
-  .help-categories {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 /* Top-right stack container */
 .demo-right {
